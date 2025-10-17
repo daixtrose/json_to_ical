@@ -12,17 +12,14 @@ int main(int argc, char* argv[]) {
     std::string input_file = argv[1];
     std::string output_file = (argc >= 3) ? argv[2] : "output.ics";
 
-    // Create generator
     ICalGenerator generator;
 
-    // Load events from JSON
     std::cout << "Loading events from " << input_file << "..." << std::endl;
     if (!generator.loadFromJson(input_file)) {
         std::cerr << "Failed to load JSON file." << std::endl;
         return 1;
     }
 
-    // Save to iCalendar file
     std::cout << "Converting to iCalendar format..." << std::endl;
     if (!generator.saveToFile(output_file)) {
         std::cerr << "Failed to save iCalendar file." << std::endl;

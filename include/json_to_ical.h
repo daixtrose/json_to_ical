@@ -5,28 +5,39 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <nlohmann/json.hpp>
+#include <map>
+#include <memory>
 #include <libical/ical.h>
+#include <tao/pegtl.hpp>
+#include <tao/pegtl/contrib/parse_tree.hpp>
 
-using json = nlohmann::json;
+namespace peg = tao::pegtl;
 
 // Event structure to hold calendar event data
 struct CalendarEvent {
     std::string summary;
     std::string description;
     std::string location;
-    std::string start_datetime;  // ISO 8601 format: YYYYMMDDTHHMMSS
-    std::string end_datetime;    // ISO 8601 format: YYYYMMDDTHHMMSS
-    std::string timezone;        // e.g., "America/New_York"
-    std::string uid;             // Unique identifier
+    std::string start_datetime;
+    std::string end_datetime;
+    std::string timezone = "UTC";
+    std::string uid;
     std::string organizer_name;
     std::string organizer_email;
-    std::vector<std::string> attendees; // Email addresses
+    std::vector<std::string> attendees;
     bool all_day_event = false;
 };
 
-// JSON to CalendarEvent conversion functions
-void from_json(const json& j, CalendarEvent& event);
+// JSON parser using PEGTL
+class JsonParser {
+public:
+    std::vector<CalendarEvent> parseFile(const std::string& filename);
+    std::vector<CalendarEvent> parseString(const std::string& json_str);
+
+private:
+    CalendarEvent parseEvent(const std::string& json_str);
+    std::vector<CalendarEvent> parseEventArray(const std::string& json_str);
+};
 
 // iCalendar generator class using libical
 class ICalGenerator {
@@ -34,23 +45,16 @@ public:
     ICalGenerator();
     ~ICalGenerator();
 
-    // Add event from CalendarEvent struct
     void addEvent(const CalendarEvent& event);
-
-    // Load events from JSON file
     bool loadFromJson(const std::string& filename);
-
-    // Export to iCalendar format using libical
     std::string toICalendar() const;
-
-    // Save to .ics file
     bool saveToFile(const std::string& filename) const;
 
 private:
     icalcomponent* vcalendar_;
     std::string prodid_;
+    JsonParser parser_;
 
-    // Helper functions
     std::string generateUID() const;
     icaltimetype parseDateTime(const std::string& datetime, bool isAllDay = false) const;
     icalcomponent* createVEvent(const CalendarEvent& event) const;

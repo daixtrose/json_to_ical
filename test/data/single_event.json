@@ -5,8 +5,8 @@
     "start_datetime": "20250120T140000",
     "end_datetime": "20250120T160000",
     "timezone": "America/New_York",
-    "organizer_name": "John Doe",
-    "organizer_email": "Markus Werrl <markus.werle@noreply.com>",
+    "organizer_name": "Markus Werle",
+    "organizer_email": "markus.werle@noreply.com",
     "attendees": [
         "[email protected]",
         "[email protected]"

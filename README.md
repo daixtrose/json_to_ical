@@ -1,52 +1,25 @@
-# JSON to iCalendar Converter (Using libical)
+# JSON to iCalendar Converter
 
-A C++ command-line tool that converts JSON files containing calendar event data to iCalendar (.ics) format using the libical library.
+A C++ tool that converts JSON files to iCalendar (.ics) format using PEGTL for JSON parsing and libical for iCalendar generation. All dependencies are managed via CMake FetchContent.
 
 ## Features
 
-- Parse JSON files with single or multiple calendar events
-- Uses libical for RFC 5545 compliant iCalendar generation
-- Support for all-day events
-- Timezone support
-- Organizer and attendee information
-- Automatic UID generation
-- Proper handling of event properties and parameters
+- **PEGTL-based JSON parsing**: Uses the PEGTL (Parsing Expression Grammar Template Library) for robust JSON validation
+- **libical for iCalendar**: RFC 5545 compliant iCalendar generation
+- **Zero manual dependencies**: CMake FetchContent automatically downloads PEGTL and libical
+- **Support for all-day events**
+- **Timezone support**
+- **Organizer and attendee information**
+- **Automatic UID generation**
 
 ## Dependencies
 
-- C++11 or later
-- nlohmann/json library (header-only)
-- libical library (>= 3.0)
-
-## Installing Dependencies
-
-### Debian/Ubuntu
-
-```bash
-sudo apt-get install nlohmann-json3-dev libical-dev
-```
-
-### macOS (Homebrew)
-
-```bash
-brew install nlohmann-json libical
-```
-
-### Arch Linux
-
-```bash
-sudo pacman -S nlohmann-json libical
-```
-
-### Fedora/RHEL
-
-```bash
-sudo dnf install json-devel libical-devel
-```
+All dependencies are automatically fetched by CMake:
+- C++17 compiler
+- CMake >= 3.14
+- Git (for fetching dependencies)
 
 ## Building
-
-### Using CMake
 
 ```bash
 mkdir build
@@ -55,20 +28,13 @@ cmake ..
 make
 ```
 
-### Manual compilation with g++
-
-```bash
-g++ -std=c++11 -I./include -o json_to_ical src/main.cpp src/json_to_ical.cpp \
-    $(pkg-config --cflags --libs libical) -lnlohmann_json
-```
+The first build will download PEGTL and libical automatically. Subsequent builds will use the cached versions.
 
 ## Usage
 
 ```bash
 ./json_to_ical input.json [output.ics]
 ```
-
-If output file is not specified, `output.ics` will be used by default.
 
 ## JSON Format
 
@@ -96,12 +62,12 @@ If output file is not specified, `output.ics` will be used by default.
 ```json
 [
   {
-    "summary": "First Event",
+    "summary": "Event 1",
     "start_datetime": "20250120T140000",
     "end_datetime": "20250120T160000"
   },
   {
-    "summary": "Second Event",
+    "summary": "Event 2",
     "start_datetime": "20250121T100000",
     "end_datetime": "20250121T110000"
   }
@@ -113,7 +79,6 @@ If output file is not specified, `output.ics` will be used by default.
 ```json
 {
   "summary": "Company Holiday",
-  "description": "New Year Holiday",
   "start_datetime": "20250101",
   "end_datetime": "20250102",
   "all_day_event": true
@@ -122,62 +87,80 @@ If output file is not specified, `output.ics` will be used by default.
 
 ## JSON Fields
 
-### Required Fields
-- `summary`: Event title/summary
-- `start_datetime`: Start date/time in format YYYYMMDDTHHMMSS or YYYYMMDD
-- `end_datetime`: End date/time in format YYYYMMDDTHHMMSS or YYYYMMDD
+### Required
+- `summary`: Event title
+- `start_datetime`: Format YYYYMMDDTHHMMSS or YYYYMMDD
+- `end_datetime`: Format YYYYMMDDTHHMMSS or YYYYMMDD
 
-### Optional Fields
+### Optional
 - `description`: Event description
 - `location`: Event location
 - `timezone`: Timezone identifier (default: "UTC")
-- `uid`: Unique identifier (auto-generated if not provided)
-- `organizer_name`: Organizer's display name
-- `organizer_email`: Organizer's email address
-- `attendees`: Array of attendee email addresses
-- `all_day_event`: Boolean flag for all-day events (default: false)
+- `uid`: Unique identifier (auto-generated if missing)
+- `organizer_name`: Organizer display name
+- `organizer_email`: Organizer email
+- `attendees`: Array of attendee emails
+- `all_day_event`: Boolean for all-day events (default: false)
 
-## Date/Time Formats
+## Implementation Details
 
-- Regular events: `YYYYMMDDTHHMMSS` (e.g., "20250120T140000")
-- All-day events: `YYYYMMDD` (e.g., "20250120")
-- Alternative format with separators: `YYYY-MM-DDTHH:MM:SS`
+### PEGTL Integration
+- Uses PEGTL's built-in JSON grammar for validation
+- Validates JSON structure before parsing
+- Provides detailed error messages for malformed JSON
 
-## Output
+### libical Integration
+- Creates proper VCALENDAR and VEVENT components
+- Handles timezone parameters correctly
+- Generates RFC 5545 compliant output
 
-The tool generates an iCalendar (.ics) file using libical that can be imported into:
-- Google Calendar
-- Apple Calendar
-- Microsoft Outlook
-- Thunderbird
-- Any other RFC 5545 compliant calendar application
-
-## Implementation Notes
-
-This version uses the libical library for generating iCalendar data:
-
-- **icalcomponent**: Represents VCALENDAR and VEVENT components
-- **icalproperty**: Represents properties like SUMMARY, DTSTART, DTEND
-- **icalparameter**: Represents parameters like TZID, CN, ROLE
-- **icaltimetype**: Handles date/time values with timezone support
-
-The libical library ensures full RFC 5545 compliance and proper handling of:
-- Component hierarchy (VCALENDAR → VEVENT)
-- Property formatting and escaping
-- Parameter handling
-- Timezone management
-- Date/time representation
+### CMake FetchContent
+- Automatically downloads and builds dependencies
+- No manual installation required
+- Dependencies are cached for faster subsequent builds
+- Configured to disable unnecessary libical features (docs, tests, examples)
 
 ## Example
 
 ```bash
-# Convert single event
-./json_to_ical examples/single_event.json team_meeting.ics
+# Build the project
+mkdir build && cd build
+cmake ..
+make
 
-# Convert multiple events
-./json_to_ical examples/multiple_events.json calendar.ics
+# Convert events
+./json_to_ical ../examples/single_event.json meeting.ics
+./json_to_ical ../examples/multiple_events.json calendar.ics
 ```
+
+## Troubleshooting
+
+### CMake version too old
+```bash
+cmake --version  # Should be >= 3.14
+```
+
+### Git not found
+Make sure git is installed and in your PATH.
+
+### Build errors with C++17
+Make sure your compiler supports C++17:
+- GCC >= 7
+- Clang >= 5
+- MSVC >= 19.14
 
 ## License
 
-This tool is provided as example code for educational purposes.
+This project uses:
+- PEGTL: Boost Software License 1.0
+- libical: MPL 2.0 / LGPL 2.1
+- This tool: Provided as example code
+
+## Output Compatibility
+
+Generated .ics files work with:
+- Google Calendar
+- Apple Calendar
+- Microsoft Outlook  
+- Mozilla Thunderbird
+- Any RFC 5545 compliant application

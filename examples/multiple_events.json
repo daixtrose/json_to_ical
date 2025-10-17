@@ -1,0 +1,32 @@
+[
+  {
+    "summary": "Project Kickoff",
+    "description": "Initial meeting for the new website redesign project",
+    "location": "Virtual - Zoom",
+    "start_datetime": "20250125T100000",
+    "end_datetime": "20250125T110000",
+    "timezone": "Europe/Berlin",
+    "organizer_name": "Jane Smith",
+    "organizer_email": "[email protected]",
+    "attendees": [
+      "[email protected]",
+      "[email protected]"
+    ]
+  },
+  {
+    "summary": "Company Holiday",
+    "description": "New Year Holiday",
+    "start_datetime": "20250101",
+    "end_datetime": "20250102",
+    "all_day_event": true
+  },
+  {
+    "summary": "Code Review Session",
+    "description": "Review pull requests and discuss best practices",
+    "location": "Dev Lab",
+    "start_datetime": "20250128T150000",
+    "end_datetime": "20250128T163000",
+    "timezone": "UTC",
+    "organizer_email": "[email protected]"
+  }
+]

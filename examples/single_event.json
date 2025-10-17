@@ -1,0 +1,15 @@
+{
+  "summary": "Team Meeting",
+  "description": "Quarterly planning meeting for Q1 2025",
+  "location": "Conference Room A",
+  "start_datetime": "20250120T140000",
+  "end_datetime": "20250120T160000",
+  "timezone": "America/New_York",
+  "organizer_name": "John Doe",
+  "organizer_email": "[email protected]",
+  "attendees": [
+    "[email protected]",
+    "[email protected]",
+    "[email protected]"
+  ]
+}

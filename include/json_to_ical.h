@@ -4,11 +4,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <sstream>
 #include <iostream>
-#include <iomanip>
-#include <ctime>
 #include <nlohmann/json.hpp>
+#include <libical/ical.h>
 
 using json = nlohmann::json;
 
@@ -30,10 +28,11 @@ struct CalendarEvent {
 // JSON to CalendarEvent conversion functions
 void from_json(const json& j, CalendarEvent& event);
 
-// iCalendar generator class
+// iCalendar generator class using libical
 class ICalGenerator {
 public:
     ICalGenerator();
+    ~ICalGenerator();
 
     // Add event from CalendarEvent struct
     void addEvent(const CalendarEvent& event);
@@ -41,21 +40,20 @@ public:
     // Load events from JSON file
     bool loadFromJson(const std::string& filename);
 
-    // Export to iCalendar format
+    // Export to iCalendar format using libical
     std::string toICalendar() const;
 
     // Save to .ics file
     bool saveToFile(const std::string& filename) const;
 
 private:
-    std::vector<CalendarEvent> events_;
+    icalcomponent* vcalendar_;
     std::string prodid_;
 
     // Helper functions
     std::string generateUID() const;
-    std::string getCurrentTimestamp() const;
-    std::string formatDateTime(const std::string& datetime, bool isAllDay = false) const;
-    std::string escapeICalText(const std::string& text) const;
+    icaltimetype parseDateTime(const std::string& datetime, bool isAllDay = false) const;
+    icalcomponent* createVEvent(const CalendarEvent& event) const;
 };
 
 #endif // JSON_TO_ICAL_H

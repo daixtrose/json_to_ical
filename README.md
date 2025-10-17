@@ -1,21 +1,48 @@
-# JSON to iCalendar Converter
+# JSON to iCalendar Converter (Using libical)
 
-A C++ command-line tool that converts JSON files containing calendar event data to iCalendar (.ics) format.
+A C++ command-line tool that converts JSON files containing calendar event data to iCalendar (.ics) format using the libical library.
 
 ## Features
 
 - Parse JSON files with single or multiple calendar events
+- Uses libical for RFC 5545 compliant iCalendar generation
 - Support for all-day events
 - Timezone support
 - Organizer and attendee information
 - Automatic UID generation
-- RFC 5545 compliant iCalendar output
-- Proper text escaping for iCalendar format
+- Proper handling of event properties and parameters
 
 ## Dependencies
 
 - C++11 or later
 - nlohmann/json library (header-only)
+- libical library (>= 3.0)
+
+## Installing Dependencies
+
+### Debian/Ubuntu
+
+```bash
+sudo apt-get install nlohmann-json3-dev libical-dev
+```
+
+### macOS (Homebrew)
+
+```bash
+brew install nlohmann-json libical
+```
+
+### Arch Linux
+
+```bash
+sudo pacman -S nlohmann-json libical
+```
+
+### Fedora/RHEL
+
+```bash
+sudo dnf install json-devel libical-devel
+```
 
 ## Building
 
@@ -30,34 +57,9 @@ make
 
 ### Manual compilation with g++
 
-If you have nlohmann/json.hpp in your include path:
-
 ```bash
-g++ -std=c++11 -I./include -o json_to_ical src/main.cpp src/json_to_ical.cpp
-```
-
-## Installing nlohmann/json
-
-### Debian/Ubuntu
-```bash
-sudo apt-get install nlohmann-json3-dev
-```
-
-### macOS (Homebrew)
-```bash
-brew install nlohmann-json
-```
-
-### Arch Linux
-```bash
-sudo pacman -S nlohmann-json
-```
-
-### Manually (header-only)
-```bash
-wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
-mkdir -p /usr/local/include/nlohmann
-sudo mv json.hpp /usr/local/include/nlohmann/
+g++ -std=c++11 -I./include -o json_to_ical src/main.cpp src/json_to_ical.cpp \
+    $(pkg-config --cflags --libs libical) -lnlohmann_json
 ```
 
 ## Usage
@@ -101,8 +103,7 @@ If output file is not specified, `output.ics` will be used by default.
   {
     "summary": "Second Event",
     "start_datetime": "20250121T100000",
-    "end_datetime": "20250121T110000",
-    "all_day_event": false
+    "end_datetime": "20250121T110000"
   }
 ]
 ```
@@ -123,8 +124,8 @@ If output file is not specified, `output.ics` will be used by default.
 
 ### Required Fields
 - `summary`: Event title/summary
-- `start_datetime`: Start date/time in format YYYYMMDDTHHMMSS or YYYYMMDD for all-day events
-- `end_datetime`: End date/time in format YYYYMMDDTHHMMSS or YYYYMMDD for all-day events
+- `start_datetime`: Start date/time in format YYYYMMDDTHHMMSS or YYYYMMDD
+- `end_datetime`: End date/time in format YYYYMMDDTHHMMSS or YYYYMMDD
 
 ### Optional Fields
 - `description`: Event description
@@ -138,18 +139,34 @@ If output file is not specified, `output.ics` will be used by default.
 
 ## Date/Time Formats
 
-- Regular events: `YYYYMMDDTHHMMSS` (e.g., "20250120T140000" for Jan 20, 2025, 2:00 PM)
-- All-day events: `YYYYMMDD` (e.g., "20250120" for Jan 20, 2025)
-- Alternative format with separators is also supported: `YYYY-MM-DDTHH:MM:SS`
+- Regular events: `YYYYMMDDTHHMMSS` (e.g., "20250120T140000")
+- All-day events: `YYYYMMDD` (e.g., "20250120")
+- Alternative format with separators: `YYYY-MM-DDTHH:MM:SS`
 
 ## Output
 
-The tool generates an iCalendar (.ics) file that can be imported into:
+The tool generates an iCalendar (.ics) file using libical that can be imported into:
 - Google Calendar
 - Apple Calendar
 - Microsoft Outlook
 - Thunderbird
 - Any other RFC 5545 compliant calendar application
+
+## Implementation Notes
+
+This version uses the libical library for generating iCalendar data:
+
+- **icalcomponent**: Represents VCALENDAR and VEVENT components
+- **icalproperty**: Represents properties like SUMMARY, DTSTART, DTEND
+- **icalparameter**: Represents parameters like TZID, CN, ROLE
+- **icaltimetype**: Handles date/time values with timezone support
+
+The libical library ensures full RFC 5545 compliance and proper handling of:
+- Component hierarchy (VCALENDAR → VEVENT)
+- Property formatting and escaping
+- Parameter handling
+- Timezone management
+- Date/time representation
 
 ## Example
 
